@@ -1,0 +1,8 @@
+#Zeo Server Startup
+runzeo -a "$PWD"/dbx/zeosocket -f "$PWD"/dbx/dbx.fs
+
+#Production Gunicorn
+gunicorn -D -w 4 -b 127.0.0.1:3030 wsgi:application --reload
+
+Development Gunicorn
+gunicorn -w 1 -b 127.0.0.1:3030 wsgi:application --reload
