@@ -25,20 +25,29 @@ def BLogin():
         return getUtility(ITemplate).render('login.tpl',{'eflag':False,'emsg':None})
 
 @get('/backend')
-def Backend():
-    if not request.is_xhr:        
-        return getUtility(ITemplate).render('backend.tpl',{})
+def BackendG():
+    if not request.is_xhr:
+        codes = Application().Tasks(('DataMNG','Get','ListCodes'))
+        return getUtility(ITemplate).render('backend.tpl',{'codes':Application().Tasks(('DataMNG','Get','ListCodes')),'cid':[False,None]})
 
 @post('/backend')
-def Backend():
+def BackendP():        
     if request.is_xhr:
         pass
 
 @get('/backend/code/<cid>')
 def GBackendCode(cid):
-    if not request.is_xhr:        
-        return getUtility(ITemplate).render('backend.item.tpl',{})
-
+    if not request.is_xhr:
+        dinfo = Application().Tasks(('DataMNG','Get','CodeDetails',cid))[1]        
+        
+        #Session JA
+        return getUtility(ITemplate).render('backend.item.tpl',{
+            'codes':Application().Tasks(('DataMNG','Get','ListCodes')),
+            'cid':[True,cid],
+            'dinfo':[dinfo.keys(),dinfo]
+        })
+    
+        
 @post('/backend/code/<cid>')
 def PBackendCode(cid):
     if request.is_xhr:

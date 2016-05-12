@@ -1,15 +1,22 @@
 {% extends "backend.tpl" %}
 {% block stuff %}
 <b>Filelist</b><br>
-Anzahl der Dateien in der DB: 10
+Anzahl der Dateien in der DB: 
 <form accept-charset="UTF-8" style="margin-bottom: 10px;">
     <table>
-        <thead></thead>
+        <thead>Download-Code: <b>{{cid.1}}</b></thead>
         <tbody>
-            <tr><td>MeineDatei.zip</td><td>Downloads: <select><option value="0">1</option><option value="1">1</option><option selected="selected" value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></td><td><img src="/img/delete.svg" width="20px" height="20"></td></tr>
+            {% for dsx in dinfo.0%}            
+            <tr><td>{{dsx}}</td><td>downloads &uuml;brig:
+                <select>
+                    {%for mxx in range(0,5)%}
+                    <option value="{{mxx}}" {%if dinfo.1[dsx].maxtry == mxx %}selected="selected"{%endif%}>{{mxx}}</option>
+                    {%endfor%}
+                </select></td><td><img src="/img/delete.svg" width="20px" height="20"></td></tr>
+            {%endfor%}            
         </tbody>
     </table>
     <input type="file" />
 </form>
-<span><button>L&ouml;sche Code</button></span>
+<span><button>L&ouml;sche alles <b>KOMPLETT</b></button></span>
 {% endblock %}

@@ -28,6 +28,10 @@ class Application(Singleton):
             
             elif param[0] == 'Users':
                 rsx = self.__UserMNG(param[1:])
+                
+            elif param[0] == 'DataMNG':                
+                rsx = self.__DataMNG(param[1:])
+                
         return rsx
     
     def __Sessions(self,param):
@@ -76,11 +80,20 @@ class Application(Singleton):
             
     def __DataMNG(self,param):
         if param[0] == 'Get':
-            if param[1] == 'ListCodes':
-                pass
+            if param[1] == 'ListCodes':                
+                codes = self.__root['dlist'].keys()
+                
+                if len(codes)>0:
+                    return [True,codes]
+                
+                else:
+                    return [False,None,0]
             
             elif param[1] == 'CodeDetails':
-                pass
+                if self.__root['dlist'].has_key(param[2]):
+                    return [True,self.__root['dlist'][param[2]]]
+                else:                    
+                    return [False,None]
             
         elif param[0] == 'Set':
             if param[1] == 'NewEntry':
@@ -112,7 +125,7 @@ class Controller(Singleton):
                 rsx = [False,'Angeforderte Datei nicht gelistet']
                 
         else:
-            rsx = [False,'Key Falsch. Bitte korriegieren.']
+            rsx = [False,'Key Falsch. Bitte korriegieren.']            
             
         return rsx
         

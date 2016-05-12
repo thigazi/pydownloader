@@ -3,7 +3,8 @@ $(document).ready(function(){
     function Backend(){        
     };
     
-    Backend.prototype.GetInfo = function(idx){        
+    Backend.prototype.GetInfo = function(idx){
+                                
     };
     
     Backend.prototype.Add = function(){        
