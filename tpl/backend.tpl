@@ -26,13 +26,14 @@
     <body>
         <span id="AIcons">
         <img src="/img/logout.svg" width="20px" height="20">
-        <img src="/img/new.svg" width="20px" height="20">
+        <img onclick="BackendObj.Add();" src="/img/new.svg" width="20px" height="20">
         </span>
                                         
         <div id="MainX">                                                
             <div id="left" style="border-style: solid;border-width: 1px;">
             <div style="padding: 10px;">            
             <b>Generierte Codes</b><br>
+            <span>                        
             {%if codes.0 == false%}
             -- Keine Codes generiert --            
             {%elif codes.0 == true%}
@@ -41,7 +42,8 @@
                 <li><a {%if cid.0 == true%}class="bcolor"{%endif%} href="/backend/code/{{cdx}}">{{cdx}}</a></li>                
                 {%endfor%}                
             </ul>
-            {%endif%}            
+            {%endif%}
+            </span>            
             </div>
             </div>
                     

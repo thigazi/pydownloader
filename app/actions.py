@@ -90,17 +90,35 @@ class Application(Singleton):
                     return [False,None,0]
             
             elif param[1] == 'CodeDetails':
-                if self.__root['dlist'].has_key(param[2]):
+                if self.__root['dlist'].has_key(param[2]):                    
                     return [True,self.__root['dlist'][param[2]]]
                 else:                    
                     return [False,None]
             
         elif param[0] == 'Set':
             if param[1] == 'NewEntry':
-                pass
+                mk = md5.new()
+                mk.update(str(time()))                
+                if not self.__root.has_key('dlist'):
+                    self.__root['dlist'] = ddict()                    
+                self.__root['dlist'][mk.hexdigest()[:10]] = ddict()                
+                commit()
+                
+                return mk.hexdigest()[:10]
             
             elif param[1] == 'DeleteEntry':
                 pass
+            
+            elif param[1] == 'DeleteAll':
+                if self.__root['dlist'].has_key(param[2]):
+                    del self.__root['dlist'][param[2]]
+                    commit()
+                    return True
+                
+                else:
+                    return False
+                
+            
             
 class Controller(Singleton):
     def __init__(self):

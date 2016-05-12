@@ -25,29 +25,44 @@ def BLogin():
         return getUtility(ITemplate).render('login.tpl',{'eflag':False,'emsg':None})
 
 @get('/backend')
-def BackendG():
+def Backend():
     if not request.is_xhr:
         codes = Application().Tasks(('DataMNG','Get','ListCodes'))
         return getUtility(ITemplate).render('backend.tpl',{'codes':Application().Tasks(('DataMNG','Get','ListCodes')),'cid':[False,None]})
-
-@post('/backend')
-def BackendP():        
-    if request.is_xhr:
-        pass
+    
+    else:
+        #Session Request hier [False,None,None]
+        response.set_header('X-Requested-With','XMLHttpRequest')
+        response.set_header('Content-Type','application/json')        
+        
+        if 'atype' in request.query.keys():
+            if 'newkey' == request.query['atype']:                
+                return dumps([True,True,Application().Tasks(('DataMNG','Set','NewEntry'))])
+            
+            else:
+                return dumps([True,False,None])
 
 @get('/backend/code/<cid>')
 def GBackendCode(cid):
     if not request.is_xhr:
-        dinfo = Application().Tasks(('DataMNG','Get','CodeDetails',cid))[1]        
-        
-        #Session JA
+        dinfo = Application().Tasks(('DataMNG','Get','CodeDetails',cid))[1]
+        #Session JA        
         return getUtility(ITemplate).render('backend.item.tpl',{
             'codes':Application().Tasks(('DataMNG','Get','ListCodes')),
             'cid':[True,cid],
-            'dinfo':[dinfo.keys(),dinfo]
+            'dinfo':[dinfo.keys(),dinfo,len(dinfo.keys())]
         })
     
+    else:
+        response.set_header('X-Requested-With','XMLHttpRequest')
+        response.set_header('Content-Type','application/json')        
+        if 'atype' in request.query.keys():
+            if 'deleteall' == request.query['atype']:                
+                return dumps([True,Application().Tasks(('DataMNG','Set','DeleteAll',cid))])
+            else:
+                return dumps([True,False])
         
+    
 @post('/backend/code/<cid>')
 def PBackendCode(cid):
     if request.is_xhr:

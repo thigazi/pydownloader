@@ -1,7 +1,7 @@
 {% extends "backend.tpl" %}
 {% block stuff %}
 <b>Filelist</b><br>
-Anzahl der Dateien in der DB: 
+Anzahl der Dateien in der DB: <b>{{dinfo.2}}</b>
 <form accept-charset="UTF-8" style="margin-bottom: 10px;">
     <table>
         <thead>Download-Code: <b>{{cid.1}}</b></thead>
@@ -16,7 +16,9 @@ Anzahl der Dateien in der DB:
             {%endfor%}            
         </tbody>
     </table>
-    <input type="file" />
+    <form id="ftsend" name="ftsend" >
+        <input type="file" name="ftsx" />
+    </form>
 </form>
-<span><button>L&ouml;sche alles <b>KOMPLETT</b></button></span>
+<span><button onclick="BackendObj.DeleteALL('{{cid.1}}');">L&ouml;sche alles <b>KOMPLETT</b></button></span>
 {% endblock %}
