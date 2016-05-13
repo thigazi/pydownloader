@@ -93,6 +93,29 @@ class Application(Singleton):
                     return [True,self.__root['dlist'][param[2]]]
                 else:                    
                     return [False,None]
+                
+            elif param[1] == 'DownloadItem':
+                if self.__root['dlist'].has_key(param[2][0]):
+                    dentry = self.__root['dlist'][param[2][0]]
+                    
+                    if dentry.has_key(param[2][1]):
+                        if dentry[param[2][1]]['maxtry']==0:
+                            return [False,'Alle Downloads aufgebraucht']
+                        
+                        else:                            
+                            dentry[param[2][1]]['maxtry']-=1
+                            commit()
+                            
+                            return [True,None]
+                        
+                    
+                    else:
+                        return [False,'Not available']
+                        
+                
+                else:                    
+                    return [False,'Not available']
+                    
             
         elif param[0] == 'Set':
             if param[1] == 'NewEntry':
@@ -136,37 +159,6 @@ class Application(Singleton):
                     del self.__root['dlist'][param[2]][param[3]]                    
                 commit()
                 return True
-            
-class Controller(Singleton):
-    def __init__(self):
-        self.__root = createObject('dbx').root
-    
-    def checkData(self,param):    
-        rsx = None
-        if self.__root['dlist'].has_key(param[0]):
-            DObj = self.__root['dlist'][param[0]]
-            
-            if DObj.has_key(param[1]):
-                if DObj[param[1]]['maxtry']>0:                     
-                    DObj[param[1]]['maxtry']-=1
-                    
-                    rsx = [True,None]                    
-                    commit()
-                    
-                else:                    
-                    rsx = [False,'Maximale Anzahl Downloads aufgebraucht']
-                    
-            else:
-                rsx = [False,'Angeforderte Datei nicht gelistet']
-                
-        else:
-            rsx = [False,'Key Falsch. Bitte korriegieren.']            
-            
-        return rsx
-        
-    
-    def AddRoot(self):
-        print self.__root
         
 class DataObject(Persistent):
     def __init__(self):

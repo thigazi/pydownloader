@@ -1,13 +1,13 @@
 {% extends "backend.tpl" %}
 {% block stuff %}
 <b>Filelist</b><br>
-Anzahl der Dateien in der DB: <b>{{dinfo.2}}</b>
+Anzahl der Dateien in der DB: <b id="cfiles">{{dinfo.2}}</b>
 
     <table>
         <thead>Download-Code: <b>{{cid.1}}</b></thead>
         <tbody>
             {% for dsx in dinfo.0%}            
-            <tr><td>{{dsx}}</td><td>downloads &uuml;brig:
+            <tr cid="{{dsx}}"><td>{{dsx}}</td><td>downloads &uuml;brig:
                 <select>
                     {%for mxx in range(0,5)%}
                     <option value="{{mxx}}" {%if dinfo.1[dsx].maxtry == mxx %}selected="selected"{%endif%}>{{mxx}}</option>

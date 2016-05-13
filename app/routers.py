@@ -3,7 +3,7 @@ from os import getcwd
 from bottle import static_file
 from zope.component import getUtility
 from libs.output import ITemplate
-from actions import Controller,Application
+from actions import Application
 from bottle import route,static_file,request,response,get,post,error
 from json import dumps
 
@@ -18,9 +18,6 @@ def JSFiles(filename):
 def IMGFiles(filename):
     return static_file(filename,getcwd()+'/static/img')
 
-@get('/')
-def Teste():
-    Controller().AddRoot()
 
 @get('/login')
 def BLogin():
@@ -80,10 +77,10 @@ def GBackendCode(cid):
                     if exists(getcwd()+'/upload/'+cid+'/'+request.query['fname']):
                         unlink(getcwd()+'/upload/'+cid+'/'+request.query['fname'])
                     Application().Tasks(('DataMNG','Set','DeleteItem',cid,request.query['fname']))                    
-                    return dumps([True,True])
+                    return dumps([True,True,request.query['fname']])
             
             else:
-                return dumps([True,False])            
+                return dumps([True,False,None])            
         
     
 @post('/backend/code/<cid>')
@@ -93,12 +90,11 @@ def PBackendCode(cid):
         response.set_header('Content-Type','application/json')                
         #Session Request hier [False,None,None]        
         ftsave = request.files.get('ftsx')
-        Application().Tasks(('DataMNG','Set','NewItem',cid,ftsave))
-        
+        Application().Tasks(('DataMNG','Set','NewItem',cid,ftsave))        
         if not exists(getcwd()+'/upload/'+cid):
             mkdir(getcwd()+'/upload/'+cid)            
         ftsave.save(getcwd()+'/upload/'+cid+'/'+ftsave.filename)
-        return dumps([True,True])
+        return dumps([True,True,ftsave.filename])
         
 
 @post('/login')
@@ -122,17 +118,16 @@ def BLogin2():
 
 @get('/<filename>')
 def getFileName(filename):
-    if match(ur'^[a-zA-Z0-9]{5,20}\.(zip|tar\.bz2|7z)$',filename) is not None:
-        return getUtility(ITemplate).render('intro.tpl',{})
+    #if match(ur'^[a-zA-Z0-9]{5,20}\.(pdf|zip|tar\.bz2|7z)$',filename) is not None:
+    return getUtility(ITemplate).render('intro.tpl',{})
 
 @post('/<filename>')
 def getFileName2(filename):
-    if match(ur'^[a-zA-Z0-9]{5,20}\.(zip|tar\.bz2|7z)$',filename) is not None:
-        otpass = request.forms.get('otpass')        
-        rsx = Controller().checkData((otpass,filename))
-        
-        if rsx[0]:
-            return static_file(filename,getcwd()+'/static')
-        
-        else:
-            return rsx[1]
+    #if match(ur'^[a-zA-Z0-9]{5,20}\.(zip|tar\.bz2|7z)$',filename) is not None:
+    otpass = request.forms.get('otpass')    
+    rsx = Application().Tasks(('DataMNG','Get','DownloadItem',(otpass,filename)))    
+    if rsx[0]:        
+        return static_file(filename,getcwd()+'/upload/'+otpass)
+    
+    else:
+        return rsx[1]
