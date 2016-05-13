@@ -7,6 +7,9 @@ from actions import Controller,Application
 from bottle import route,static_file,request,response,get,post,error
 from json import dumps
 
+from os import rmdir,mkdir,unlink,walk
+from os.path import exists
+
 @get('/js/<filename>')
 def JSFiles(filename):
     return static_file(filename,getcwd()+'/static/js')
@@ -36,8 +39,11 @@ def Backend():
         response.set_header('Content-Type','application/json')        
         
         if 'atype' in request.query.keys():
-            if 'newkey' == request.query['atype']:                
-                return dumps([True,True,Application().Tasks(('DataMNG','Set','NewEntry'))])
+            if 'newkey' == request.query['atype']:
+                nentry = Application().Tasks(('DataMNG','Set','NewEntry'))
+                if not exists(getcwd()+'/upload/'+nentry):
+                    mkdir(getcwd()+'/upload/'+nentry)                
+                return dumps([True,True,nentry])
             
             else:
                 return dumps([True,False,None])
@@ -58,20 +64,26 @@ def GBackendCode(cid):
         response.set_header('Content-Type','application/json')        
         #Session Request hier [False,None,None]        
         if 'atype' in request.query.keys():
-            if 'deleteall' == request.query['atype']:                
+            if 'deleteall' == request.query['atype']:
+                wx = [None,None]
+                for wx[0] in walk(getcwd()+'/upload/'+cid):
+                    for wx[1] in wx[0][2]:
+                        unlink(wx[0][0]+'/'+wx[1])
+                        
+                if exists(getcwd()+'/upload/'+cid):
+                    rmdir(getcwd()+'/upload/'+cid)
+                    
                 return dumps([True,Application().Tasks(('DataMNG','Set','DeleteAll',cid))])
             
             elif 'deleteItem' == request.query['atype']:
-                if request.query['fname'] is not None:                    
-                    Application().Tasks(('DataMNG','Set','DeleteItem',cid,request.query['fname']))
-                    
+                if request.query['fname'] is not None:
+                    if exists(getcwd()+'/upload/'+cid+'/'+request.query['fname']):
+                        unlink(getcwd()+'/upload/'+cid+'/'+request.query['fname'])
+                    Application().Tasks(('DataMNG','Set','DeleteItem',cid,request.query['fname']))                    
                     return dumps([True,True])
-                #if 'fname' in request.keys():
-                    
             
             else:
-                return dumps([True,False])
-            
+                return dumps([True,False])            
         
     
 @post('/backend/code/<cid>')
@@ -82,6 +94,10 @@ def PBackendCode(cid):
         #Session Request hier [False,None,None]        
         ftsave = request.files.get('ftsx')
         Application().Tasks(('DataMNG','Set','NewItem',cid,ftsave))
+        
+        if not exists(getcwd()+'/upload/'+cid):
+            mkdir(getcwd()+'/upload/'+cid)            
+        ftsave.save(getcwd()+'/upload/'+cid+'/'+ftsave.filename)
         return dumps([True,True])
         
 

@@ -11,8 +11,6 @@ from passlib.hash import pbkdf2_sha256
 from time import time
 from persistent.list import PersistentList as dlist
 from persistent.dict import PersistentDict as ddict
-from zodbpickle import pickle
-from zodbpickle import binary
 from transaction import commit
 
 class Application(Singleton):
@@ -107,34 +105,36 @@ class Application(Singleton):
                 
                 return mk.hexdigest()[:10]
             
-            elif param[1] == 'DeleteAll':
-                if self.__root['dlist'].has_key(param[2]):
-                    del self.__root['dlist'][param[2]]
-                    del self.__root['flist'][param[2]]
-                    commit()
-                    return True
+            elif param[1] == 'DeleteAll':                                
+                del self.__root['dlist'][param[2]]
+                commit()
+                return True
                 
-                else:
-                    return False
-                
-            elif param[1] == 'NewItem':                
-                self.__root['dlist'][param[2]][param[3].filename] = ddict({'maxtry':3})                
-                
-                if not self.__root.has_key('flist'):
-                    self.__root['flist'] = ddict()
-                    
-                if not self.__root['flist'].has_key(param[2]):
-                    self.__root['flist'][param[2]] = ddict()                    
-                self.__root['flist'][param[2]][param[3].filename] = pickle.dumps(param[3],protocol=2)
+            elif param[1] == 'NewItem':
+                '''
+                for xlist in ('flist','dlist'):
+                    if not self.__root.has_key(xlist):
+                        self.__root[xlist] = ddict()
+                        self.__root[xlist][param[2]] = ddict()                
+                        '''
+                if not self.__root.has_key('dlist'):
+                    self.__root['dlist'] = ddict()
+                    self.__root['dlist'][param[2]] = ddict()
+
+                self.__root['dlist'][param[2]][param[3].filename] = ddict({'maxtry':3})
+                #self.__root['flist'][param[2]][param[3].filename] = pickle.dumps(param[3],protocol=2)                
                 commit()
                 
             elif param[1] == 'DeleteItem':
-                if self.__root['dlist'][param[2]].has_key(param[3]):
-                    del self.__root['dlist'][param[2]][param[3]]
-                    
-                if self.__root['flist'][param[2]].has_key(param[3]):
-                    del self.__root['flist'][param[2]][param[3]]
+                '''for xlist in ('flist','dlist'):
+                    if self.__root[xlist][param[2]].has_key(param[3]):
+                        del self.__root[xlist][param[2]][param[3]]
+                commit()                
+                '''
                 
+                if self.__root['dlist'][param[2]].has_key(param[3]):
+                    del self.__root['dlist'][param[2]][param[3]]                    
+                commit()
                 return True
             
 class Controller(Singleton):
