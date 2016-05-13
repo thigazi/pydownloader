@@ -11,8 +11,9 @@ from passlib.hash import pbkdf2_sha256
 from time import time
 from persistent.list import PersistentList as dlist
 from persistent.dict import PersistentDict as ddict
+from zodbpickle import pickle
+from zodbpickle import binary
 from transaction import commit
-
 
 class Application(Singleton):
     
@@ -20,7 +21,7 @@ class Application(Singleton):
         self.__root = createObject('dbx').root
     
     def Tasks(self,param):
-        rsx = None        
+        rsx = None
         if param[0] in ('Sessions','Users','DataMNG'):
             if param[0] == 'Sessions':
                 
@@ -106,19 +107,35 @@ class Application(Singleton):
                 
                 return mk.hexdigest()[:10]
             
-            elif param[1] == 'DeleteEntry':
-                pass
-            
             elif param[1] == 'DeleteAll':
                 if self.__root['dlist'].has_key(param[2]):
                     del self.__root['dlist'][param[2]]
+                    del self.__root['flist'][param[2]]
                     commit()
                     return True
                 
                 else:
                     return False
                 
-            
+            elif param[1] == 'NewItem':                
+                self.__root['dlist'][param[2]][param[3].filename] = ddict({'maxtry':3})                
+                
+                if not self.__root.has_key('flist'):
+                    self.__root['flist'] = ddict()
+                    
+                if not self.__root['flist'].has_key(param[2]):
+                    self.__root['flist'][param[2]] = ddict()                    
+                self.__root['flist'][param[2]][param[3].filename] = pickle.dumps(param[3],protocol=2)
+                commit()
+                
+            elif param[1] == 'DeleteItem':
+                if self.__root['dlist'][param[2]].has_key(param[3]):
+                    del self.__root['dlist'][param[2]][param[3]]
+                    
+                if self.__root['flist'][param[2]].has_key(param[3]):
+                    del self.__root['flist'][param[2]][param[3]]
+                
+                return True
             
 class Controller(Singleton):
     def __init__(self):
@@ -153,7 +170,8 @@ class Controller(Singleton):
         
 class DataObject(Persistent):
     def __init__(self):
-        pass
+        self.filename = None
+        self.fcontent = None
     
     def __delete__(self):
         pass

@@ -53,21 +53,37 @@ def GBackendCode(cid):
             'dinfo':[dinfo.keys(),dinfo,len(dinfo.keys())]
         })
     
-    else:
+    else:        
         response.set_header('X-Requested-With','XMLHttpRequest')
         response.set_header('Content-Type','application/json')        
+        #Session Request hier [False,None,None]        
         if 'atype' in request.query.keys():
             if 'deleteall' == request.query['atype']:                
                 return dumps([True,Application().Tasks(('DataMNG','Set','DeleteAll',cid))])
+            
+            elif 'deleteItem' == request.query['atype']:
+                if request.query['fname'] is not None:                    
+                    Application().Tasks(('DataMNG','Set','DeleteItem',cid,request.query['fname']))
+                    
+                    return dumps([True,True])
+                #if 'fname' in request.keys():
+                    
+            
             else:
                 return dumps([True,False])
+            
         
     
 @post('/backend/code/<cid>')
 def PBackendCode(cid):
     if request.is_xhr:
-        pass
-
+        response.set_header('X-Requested-With','XMLHttpRequest')
+        response.set_header('Content-Type','application/json')                
+        #Session Request hier [False,None,None]        
+        ftsave = request.files.get('ftsx')
+        Application().Tasks(('DataMNG','Set','NewItem',cid,ftsave))
+        return dumps([True,True])
+        
 
 @post('/login')
 def BLogin2():
