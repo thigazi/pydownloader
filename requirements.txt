@@ -2,9 +2,7 @@ bottle
 jinja2
 ZODB
 ZEO
-M2Crypto
 zope.component
 zope.interface
 zodbpickle
-gunicorn
-passlib
+geoip2

@@ -33,8 +33,9 @@
 			    <button class="rahmen" onclick="MeinObj.SendeForm();" value="Senden!">Login!</button>			    			    
 			</div>			
 			<span id="emsg"></span>
-									   			
 		</div>
-					
+		{%if setpass%}
+		<span style="position:relative;top: 120px;left:40%;font-family: Arial">Create a new Login and Password for the 1st Account</span>
+		{%endif%}
 	</body>	
 </html>

@@ -1,5 +1,8 @@
-#Zeo Server Startup
+#Zeo Server Startup (Linux)
 runzeo -a "$PWD"/dbx/zeosocket -f "$PWD"/dbx/dbx.fs
+
+#Zeo Server Startup (Windows)
+runzeo -f C:\<PATH>\pydownloader\dbx\dbx.fs -a 127.0.0.1:3000
 
 #Production Gunicorn
 gunicorn -D -w 4 -b 127.0.0.1:3030 wsgi:application --reload

@@ -6,7 +6,7 @@ from zope.component import createObject
 from transaction import commit
 from persistent import Persistent
 
-import base64, M2Crypto,md5
+import base64, md5
 from passlib.hash import pbkdf2_sha256
 from time import time
 from persistent.list import PersistentList as dlist
@@ -22,7 +22,6 @@ class Application(Singleton):
         rsx = None
         if param[0] in ('Sessions','Users','DataMNG'):
             if param[0] == 'Sessions':
-                
                 rsx = self.__Sessions(param[1:])
             
             elif param[0] == 'Users':
@@ -34,11 +33,13 @@ class Application(Singleton):
         return rsx
     
     def __Sessions(self,param):
+        tnow = int(time())
+        
         if param[0] == 'check':
             pass
             
         elif param[0] == 'add':
-            sessdata = [base64.b64encode(M2Crypto.m2.rand_bytes(20)),str(time()).split('.')[0]]
+            sessdata = [md5.new(request.remote_addr+str(tnow)).hexdigest(),tnow]
             if not self.__root.has_key('sessions'):
                 self.__root['sessions'] = ddict({sessdata[0]:sessdata[1]})
             
@@ -50,14 +51,33 @@ class Application(Singleton):
         
         elif param[0] == 'update':
             #Alle Sessions Ueberpruefen ob
+            self.__Sessions(['update',''])
             pass
         
         elif param[0] == 'delete':
             pass
         
         
-    def __UserMNG(self,param):        
-        if param[0] == 'add':
+    def __UserMNG(self,param):
+        if param[0] == 'checkExist':
+            if not self.__root.has_key('backend'):
+                self.__root['backend'] = {'users':ddict()}
+                commit()
+            
+            if not self.__root['backend'].has_key('users'):
+                return [False,None]
+            
+            elif len(self.__root['backend']['users']) == 0:
+                return [False,None]
+            
+            else:
+                return [True,None]
+        
+        elif param[0] == 'add':
+            if not self.__root.has_key('backend'):
+                self.__root['backend'] = {'users':ddict()}
+                commit()
+                
             hpass = pbkdf2_sha256.encrypt(param[1], rounds=200000, salt_size=16)
         
         elif param[0] == 'update':
@@ -67,8 +87,8 @@ class Application(Singleton):
             pass
         
         elif param[0] == 'auth':
-            if self.__root['backend'].has_key(param[1][0]):
-                if pbkdf2_sha256.verify(param[1][1], self.__root['backend'][param[1][0]]):
+            if self.__root['backend']['users'].has_key(param[1][0]):
+                if pbkdf2_sha256.verify(param[1][1], self.__root['backend']['users'][param[1][0]]):
                     return [True,None]
                 
                 else:

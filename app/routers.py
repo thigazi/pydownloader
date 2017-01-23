@@ -4,25 +4,34 @@ from bottle import static_file
 from zope.component import getUtility
 from libs.output import ITemplate
 from actions import Application
-from bottle import route,static_file,request,response,get,post,error
+from bottle import route,static_file,request,response,get,post,error,redirect
 from json import dumps
 
 from os import rmdir,mkdir,unlink,walk
 from os.path import exists
+from os import sep
 
 @get('/js/<filename>')
 def JSFiles(filename):
-    return static_file(filename,getcwd()+'/static/js')
+    return static_file(filename,getcwd()+sep+'static'+sep+'js')
 
 @get('/img/<filename>')
 def IMGFiles(filename):
-    return static_file(filename,getcwd()+'/static/img')
-
+    return static_file(filename,getcwd()+sep+'static'+sep+'img')
 
 @get('/login')
 def BLogin():
     if not request.is_xhr:
-        return getUtility(ITemplate).render('login.tpl',{'eflag':False,'emsg':None})
+        if Application().Tasks(['Users','checkExist'])[0]:
+            return getUtility(ITemplate).render('login.tpl',{'eflag':False,'emsg':None,'setpass':False})
+        
+        else:
+            redirect('/newpass')
+
+@get('/newpass')
+def NLogin():
+    if not request.is_xhr:
+        return getUtility(ITemplate).render('login2.tpl',{'eflag':False,'emsg':None,'setpass':True})
 
 @get('/backend')
 def Backend():
@@ -38,8 +47,8 @@ def Backend():
         if 'atype' in request.query.keys():
             if 'newkey' == request.query['atype']:
                 nentry = Application().Tasks(('DataMNG','Set','NewEntry'))
-                if not exists(getcwd()+'/upload/'+nentry):
-                    mkdir(getcwd()+'/upload/'+nentry)                
+                if not exists(getcwd()+sep+'upload'+sep+nentry):
+                    mkdir(getcwd()+sep+'upload'+sep+nentry)
                 return dumps([True,True,nentry])
             
             else:
@@ -63,19 +72,19 @@ def GBackendCode(cid):
         if 'atype' in request.query.keys():
             if 'deleteall' == request.query['atype']:
                 wx = [None,None]
-                for wx[0] in walk(getcwd()+'/upload/'+cid):
+                for wx[0] in walk(getcwd()+sep+'upload'+sep+cid):
                     for wx[1] in wx[0][2]:
-                        unlink(wx[0][0]+'/'+wx[1])
+                        unlink(wx[0][0]+sep+wx[1])
                         
-                if exists(getcwd()+'/upload/'+cid):
-                    rmdir(getcwd()+'/upload/'+cid)
+                if exists(getcwd()+sep+'upload'+sep+cid):
+                    rmdir(getcwd()+sep+'upload'+sep+cid)
                     
                 return dumps([True,Application().Tasks(('DataMNG','Set','DeleteAll',cid))])
             
             elif 'deleteItem' == request.query['atype']:
                 if request.query['fname'] is not None:
-                    if exists(getcwd()+'/upload/'+cid+'/'+request.query['fname']):
-                        unlink(getcwd()+'/upload/'+cid+'/'+request.query['fname'])
+                    if exists(getcwd()+sep+'upload'+sep+cid+sep+request.query['fname']):
+                        unlink(getcwd()+sep+'upload'+sep+cid+sep+request.query['fname'])
                     Application().Tasks(('DataMNG','Set','DeleteItem',cid,request.query['fname']))                    
                     return dumps([True,True,request.query['fname']])
             
@@ -91,9 +100,9 @@ def PBackendCode(cid):
         #Session Request hier [False,None,None]        
         ftsave = request.files.get('ftsx')
         Application().Tasks(('DataMNG','Set','NewItem',cid,ftsave))        
-        if not exists(getcwd()+'/upload/'+cid):
-            mkdir(getcwd()+'/upload/'+cid)            
-        ftsave.save(getcwd()+'/upload/'+cid+'/'+ftsave.filename)
+        if not exists(getcwd()+sep+'upload'+sep+cid):
+            mkdir(getcwd()+sep+'upload'+sep+cid)            
+        ftsave.save(getcwd()+sep+'upload'+sep+cid+sep+ftsave.filename)
         return dumps([True,True,ftsave.filename])
         
 
@@ -107,15 +116,27 @@ def BLogin2():
         if len(cred) == 2:
             authrs = Application().Tasks(('Users','auth',cred))
             if authrs[0]:
-                return dumps([True,Application().Tasks(('Sessions','add'))])
+                return dumps([True,Application().Tasks(('Sessions','add',request.remote_addr))])
             
             else:
                 return dumps([False,authrs[1]])                
             
         else:
             return dumps([False,'Bitte beide Felder ausf&uuml;llen'])
-        
-
+   
+   
+@post('/newpass')
+def NLogin2():
+    if not request.is_xhr:
+        cred = request.forms.getall('credentials')
+        if len(cred[0])!=0 and len(cred[1])!=0:
+            Application().Tasks(('Users',''))
+            
+            redirect(url)
+            
+        else:
+            print 'NOOO'
+    
 @get('/<filename>')
 def getFileName(filename):
     #if match(ur'^[a-zA-Z0-9]{5,20}\.(pdf|zip|tar\.bz2|7z)$',filename) is not None:
@@ -127,7 +148,7 @@ def getFileName2(filename):
     otpass = request.forms.get('otpass')    
     rsx = Application().Tasks(('DataMNG','Get','DownloadItem',(otpass,filename)))    
     if rsx[0]:        
-        return static_file(filename,getcwd()+'/upload/'+otpass)
+        return static_file(filename,getcwd()+sep+'upload'+sep+otpass)
     
     else:
         return rsx[1]
