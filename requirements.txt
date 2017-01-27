@@ -5,4 +5,5 @@ ZEO
 zope.component
 zope.interface
 zodbpickle
+passlib
 geoip2

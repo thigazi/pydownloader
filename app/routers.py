@@ -113,16 +113,18 @@ def BLogin2():
         response.set_header('Content-Type','application/json')        
         
         cred = request.forms.getall('credentials')
-        if len(cred) == 2:
+        
+        if not (len(cred[0])==0 or len(cred[1])==0):
             authrs = Application().Tasks(('Users','auth',cred))
             if authrs[0]:
-                return dumps([True,Application().Tasks(('Sessions','add',request.remote_addr))])
+                print 'Hitten!'
+                #return dumps([True,Application().Tasks(('Sessions','add',request.remote_addr))])
+                return dumps([False,'Hitten!'])
             
             else:
-                return dumps([False,authrs[1]])                
-            
+                return dumps([False,authrs[1]])            
         else:
-            return dumps([False,'Bitte beide Felder ausf&uuml;llen'])
+            return dumps([False,'Please fillout both fields!'])
    
    
 @post('/newpass')
@@ -130,12 +132,11 @@ def NLogin2():
     if not request.is_xhr:
         cred = request.forms.getall('credentials')
         if len(cred[0])!=0 and len(cred[1])!=0:
-            Application().Tasks(('Users',''))
-            
-            redirect(url)
+            if Application().Tasks(('Users','add',cred))[0]:
+                redirect('/login')
             
         else:
-            print 'NOOO'
+            redirect('/login')
     
 @get('/<filename>')
 def getFileName(filename):

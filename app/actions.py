@@ -40,6 +40,7 @@ class Application(Singleton):
             
         elif param[0] == 'add':
             sessdata = [md5.new(request.remote_addr+str(tnow)).hexdigest(),tnow]
+            
             if not self.__root.has_key('sessions'):
                 self.__root['sessions'] = ddict({sessdata[0]:sessdata[1]})
             
@@ -75,10 +76,14 @@ class Application(Singleton):
         
         elif param[0] == 'add':
             if not self.__root.has_key('backend'):
-                self.__root['backend'] = {'users':ddict()}
-                commit()
+                self.__root['backend'] = ddict({'users':ddict({param[1][0]:pbkdf2_sha256.encrypt(param[1][1], rounds=200000, salt_size=16)})})
                 
-            hpass = pbkdf2_sha256.encrypt(param[1], rounds=200000, salt_size=16)
+            else:
+                if len(self.__root['backend']['users']) == 0:
+                    self.__root['backend']['users'] = ddict({param[1][0]:pbkdf2_sha256.encrypt(param[1][1], rounds=200000, salt_size=16)})
+            commit()
+            
+            return [True,None]
         
         elif param[0] == 'update':
             pass
