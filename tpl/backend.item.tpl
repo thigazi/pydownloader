@@ -1,13 +1,13 @@
 {% extends "backend.tpl" %}
 {% block stuff %}
 <b>Filelist</b><br>
-Anzahl der Dateien in der DB: <b id="cfiles">{{dinfo.2}}</b>
+Amount of Files in DB: <b id="cfiles">{{dinfo.2}}</b>
 
     <table>
         <thead>Download-Code: <b>{{cid.1}}</b></thead>
         <tbody>
             {% for dsx in dinfo.0%}            
-            <tr cid="{{dsx}}"><td>{{dsx}}</td><td>downloads &uuml;brig:
+            <tr cid="{{dsx}}"><td>{{dsx}}</td><td>downloads left:
                 <select>
                     {%for mxx in range(0,5)%}
                     <option value="{{mxx}}" {%if dinfo.1[dsx].maxtry == mxx %}selected="selected"{%endif%}>{{mxx}}</option>
@@ -20,5 +20,5 @@ Anzahl der Dateien in der DB: <b id="cfiles">{{dinfo.2}}</b>
 <form enctype="multipart/form-data" method="post" name="ftsend" id="ftsend">
     <input onchange="BackendObj.AddItem('{{cid.1}}');" id="ftupload" type="file" name="ftsx" />
     </form>
-<span><button onclick="BackendObj.DeleteALL('{{cid.1}}');">L&ouml;sche alles <b>KOMPLETT</b></button></span>
+<span><button onclick="BackendObj.DeleteALL('{{cid.1}}');">Delete everything <b>COMPLETLY</b></button></span>
 {% endblock %}

@@ -32,10 +32,10 @@
         <div id="MainX">                                                
             <div id="left" style="border-style: solid;border-width: 1px;">
             <div style="padding: 10px;">            
-            <b>Generierte Codes</b><br>
+            <b>generated codes</b><br>
             <span>                        
             {%if codes.0 == false%}
-            -- Keine Codes generiert --            
+            -- NO Codes generated --            
             {%elif codes.0 == true%}
             <ul>
                 {%for cdx in codes.1%}

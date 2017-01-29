@@ -101,7 +101,9 @@ def PBackendCode(cid):
         ftsave = request.files.get('ftsx')
         Application().Tasks(('DataMNG','Set','NewItem',cid,ftsave))        
         if not exists(getcwd()+sep+'upload'+sep+cid):
-            mkdir(getcwd()+sep+'upload'+sep+cid)            
+            if not exists(getcwd()+sep+'upload'):
+                mkdir(getcwd()+sep+'upload')
+            mkdir(getcwd()+sep+'upload'+sep+cid)
         ftsave.save(getcwd()+sep+'upload'+sep+cid+sep+ftsave.filename)
         return dumps([True,True,ftsave.filename])
         
@@ -117,9 +119,8 @@ def BLogin2():
         if not (len(cred[0])==0 or len(cred[1])==0):
             authrs = Application().Tasks(('Users','auth',cred))
             if authrs[0]:
-                print 'Hitten!'
-                #return dumps([True,Application().Tasks(('Sessions','add',request.remote_addr))])
-                return dumps([False,'Hitten!'])
+                return dumps([True,Application().Tasks(('Sessions','add',request.remote_addr))])
+                #return dumps([False,'Hitten!'])
             
             else:
                 return dumps([False,authrs[1]])            

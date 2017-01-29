@@ -35,17 +35,17 @@ class Application(Singleton):
     def __Sessions(self,param):
         tnow = int(time())
         
-        if param[0] == 'check':
+        if param[0] == 'checkExpired':
             pass
             
         elif param[0] == 'add':
             sessdata = [md5.new(request.remote_addr+str(tnow)).hexdigest(),tnow]
             
-            if not self.__root.has_key('sessions'):
-                self.__root['sessions'] = ddict({sessdata[0]:sessdata[1]})
+            if not self.__root['backend'].has_key('sessions'):
+                self.__root['backend']['sessions'] = ddict({sessdata[0]:sessdata[1]})
             
             else:
-                self.__root['sessions'][sessdata[0]] = sessdata[1]
+                self.__root['backend']['sessions'][sessdata[0]] = sessdata[1]
             commit()
             
             return sessdata[0]
@@ -62,8 +62,7 @@ class Application(Singleton):
     def __UserMNG(self,param):
         if param[0] == 'checkExist':
             if not self.__root.has_key('backend'):
-                self.__root['backend'] = {'users':ddict()}
-                commit()
+                return [False,None]
             
             if not self.__root['backend'].has_key('users'):
                 return [False,None]
@@ -97,14 +96,18 @@ class Application(Singleton):
                     return [True,None]
                 
                 else:
-                    return [False,'Falsches Passwort']
+                    return [False,'wrong password']
                 
             else:
-                return [False,'Benutzeraccount existiert nicht']
+                return [False,'user account does not exist']
             
     def __DataMNG(self,param):
         if param[0] == 'Get':
-            if param[1] == 'ListCodes':                
+            if param[1] == 'ListCodes':
+                if not self.__root.has_key('dlist'):
+                    self.__root['dlist'] = ddict()
+                    commit()
+                    
                 codes = self.__root['dlist'].keys()
                 
                 if len(codes)>0:
@@ -125,7 +128,7 @@ class Application(Singleton):
                     
                     if dentry.has_key(param[2][1]):
                         if dentry[param[2][1]]['maxtry']==0:
-                            return [False,'Alle Downloads aufgebraucht']
+                            return [False,'Alle downloads depleted']
                         
                         else:                            
                             dentry[param[2][1]]['maxtry']-=1
