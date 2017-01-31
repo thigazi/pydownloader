@@ -2,7 +2,9 @@
 <html>
     <head>
         <title>Backend {%if cid.0 == false%}Overview{%elif  cid.0 == true%}ID: {{cid.1}}{%endif%}</title>
-        <script src="/js/jquery-2.2.3.min.js" type="text/javascript"></script>        
+        <script src="/js/jquery-2.2.3.min.js" type="text/javascript"></script>
+        <script src="/js/js.cookie.js" type="text/javascript"></script>
+        <script src="/js/js.storage.min.js" type="text/javascript"></script>       
         <script src="/js/backend.js" type="text/javascript"></script>             
         <style type="text/css">
         #AIcons:hover {cursor:pointer;}

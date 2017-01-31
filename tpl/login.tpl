@@ -18,7 +18,10 @@
 			#boxx span {margin-top:15px;position:absolute;font-family:Arial}
 		</style>
 		<script src="/js/jquery-2.2.3.min.js" type="text/javascript"></script>
-		<script src="/js/jquery.session.js" type="text/javascript"></script>
+		<!--<script src="/js/jquery.session.js" type="text/javascript"></script>-->
+		<script src="/js/js.cookie.js" type="text/javascript"></script>
+		<script src="/js/js.storage.min.js" type="text/javascript"></script>
+		
 		<script src="/js/start.js" type="text/javascript"></script>		
 	</head>
 	<body>

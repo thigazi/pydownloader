@@ -2,38 +2,34 @@ var MeinObj = null;
 
 $(document).ready(function()
 {    
-function MeineApp(){};
+function MeineApp(){
+	var SessID = null;
+	var Storage;
+};
+    
     MeineApp.prototype.SendeForm = function(){
         $.post('/login',$('#LArea').serialize()).done(function(data){
-            if(data[0] == true){
-                try{
-                    $.session.set('sid','sdsdsdsds');
-                    if($.session.get('sid') != undefined){
-                        //Bei Erfolg
-                        window.location.href = '/backend';
-                    }
-                    
-                    else{
-                        
-                        document.getElementById('emsg').innerHTML = 'Session abgelaufen';                        
-                    }               
-                }
-                
-                catch(err){
-                    /*
-                     *$('#emsg').innerHTML = 'Hallo Fehler!'; 
-                     * funktionier nicht, warum auch immer....
-                     */                    
-                    //Cookies deaktiviert
-                    document.getElementById('emsg').innerHTML = 'Bitte aktivieren Sie cookies und geben Sie das Passwort ein.<br>Neuladen der Webseite nicht notwendig';
-                }                                                                           
+            if(data[0]){
+            	MeinObj.SessID = data[1];
+            	MeinObj.Storage.set('sid',data[1]);
+                	
+            	if(MeinObj.Storage.isSet('sid'))
+            	{
+            		window.location.href = '/backend';
+            	}
+            	
+            	else {
+            		$('#emsg').html('Please activate Cookies in your browser and retry.');
+            	}                                                                        
             }
             
-            else if(data[0] == false)
+            else
             {
-                document.getElementById('emsg').innerHTML = data[1];                
+            	$('#emsg').html(data[1]);
             }                                                                       
         });
     };
-    MeinObj = new MeineApp();        
+    MeinObj = new MeineApp();
+    MeinObj.Storage = Storages.cookieStorage;
+    MeinObj.Storage.removeAll();
 });

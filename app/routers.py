@@ -10,6 +10,45 @@ from json import dumps
 from os import rmdir,mkdir,unlink,walk
 from os.path import exists
 from os import sep
+from zope.component import createObject
+from transaction import commit
+
+@get('/verify/cookietest')
+def CookieTest():
+    if request.get_cookie('sid') is not None:
+        print Application().Tasks(['Sessions','checkExpired',request.get_cookie('sid')])
+        return request.get_cookie('sid')
+    
+    else:
+        return 'No!'
+
+@get('/verify/now')
+def SampleTest():
+    root = createObject('dbx').root
+    print root
+    for x in root['backend']['sessions'].keys():
+        del root['backend']['sessions'][x]
+    commit()
+    
+    return 'TEST'
+
+@get('/verify/session')
+def VerifySession():
+    if request.is_xhr:
+        response.set_header('X-Requested-With','XMLHttpRequest')
+        response.set_header('Content-Type','application/json')
+        
+        if request.get_cookie('sid') is not None:
+            rs = Application().Tasks(['Sessions','checkExpired',request.get_cookie('sid')])
+            return dumps(rs)
+            
+        else:
+            return dumps([False,None])
+
+@get('/<filename>')
+def getFileName(filename):
+    #if match(ur'^[a-zA-Z0-9]{5,20}\.(pdf|zip|tar\.bz2|7z)$',filename) is not None:
+    return getUtility(ITemplate).render('intro.tpl',{})
 
 @get('/js/<filename>')
 def JSFiles(filename):
@@ -36,8 +75,13 @@ def NLogin():
 @get('/backend')
 def Backend():
     if not request.is_xhr:
-        codes = Application().Tasks(('DataMNG','Get','ListCodes'))
-        return getUtility(ITemplate).render('backend.tpl',{'codes':Application().Tasks(('DataMNG','Get','ListCodes')),'cid':[False,None]})
+        if request.get_cookie('sid') is None:
+            redirect('/login')
+        
+        else:
+            Application().Tasks(['Sessions','checkExpired',request.get_cookie('sid')])
+            codes = Application().Tasks(('DataMNG','Get','ListCodes'))
+            return getUtility(ITemplate).render('backend.tpl',{'codes':Application().Tasks(('DataMNG','Get','ListCodes')),'cid':[False,None]})
     
     else:
         #Session Request hier [False,None,None]
@@ -138,11 +182,6 @@ def NLogin2():
             
         else:
             redirect('/login')
-    
-@get('/<filename>')
-def getFileName(filename):
-    #if match(ur'^[a-zA-Z0-9]{5,20}\.(pdf|zip|tar\.bz2|7z)$',filename) is not None:
-    return getUtility(ITemplate).render('intro.tpl',{})
 
 @post('/<filename>')
 def getFileName2(filename):
@@ -154,3 +193,4 @@ def getFileName2(filename):
     
     else:
         return rsx[1]
+    

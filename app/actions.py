@@ -36,9 +36,36 @@ class Application(Singleton):
         tnow = int(time())
         
         if param[0] == 'checkExpired':
-            pass
+            rs = None
+            sakeys = self.__root['backend']['sessions'].keys()
+            if self.__root['backend']['sessions'].has_key(param[1]):
+                
+                print sakeys
+                tdiff = tnow-self.__root['backend']['sessions'][param[1]]
+                if tdiff>300:
+                    rs = [False,None]
+                    del self.__root['backend']['sessions'][param[1]]
+                    sakeys = self.__root['backend']['sessions'].keys()
+                    commit()
+                    
+                else:
+                    self.__root['backend']['sessions'][param[1]] = tnow
+                    
+                    rs = [True,None]
+            
+            else:
+                rs = [False,None]
+            
+            for sk in sakeys:
+                tdiff = tnow-self.__root['backend']['sessions'][sk]
+                if tdiff>300:
+                    del self.__root['backend']['sessions'][sk]
+                    
+            commit()
+            return rs
             
         elif param[0] == 'add':
+            print self.__root
             sessdata = [md5.new(request.remote_addr+str(tnow)).hexdigest(),tnow]
             
             if not self.__root['backend'].has_key('sessions'):

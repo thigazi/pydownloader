@@ -3,6 +3,12 @@ $(document).ready(function(){
     function Backend(){        
     };
     
+    Backend.prototype.CheckSession = function(type){
+    	$.get('/verify/session').done(function(data){
+    		console.log(data);
+    	});
+    };
+    
     Backend.prototype.Add = function(){
         $.get('/backend?atype=newkey',function(data){}).done(function(data){
             if(data[0]){
