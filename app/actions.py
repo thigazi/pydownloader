@@ -189,12 +189,6 @@ class Application(Singleton):
                 return True
                 
             elif param[1] == 'NewItem':
-                '''
-                for xlist in ('flist','dlist'):
-                    if not self.__root.has_key(xlist):
-                        self.__root[xlist] = ddict()
-                        self.__root[xlist][param[2]] = ddict()                
-                        '''
                 if not self.__root.has_key('dlist'):
                     self.__root['dlist'] = ddict()
                     self.__root['dlist'][param[2]] = ddict()
