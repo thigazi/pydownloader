@@ -27,7 +27,7 @@
     </head>
     <body>
         <span id="AIcons">
-        <img src="/img/logout.svg" width="20px" height="20">
+        <img onclick="BackendObj.Logout();" src="/img/logout.svg" width="20px" height="20">
         <img onclick="BackendObj.Add();" src="/img/new.svg" width="20px" height="20">
         </span>
                                         

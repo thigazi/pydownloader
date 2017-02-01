@@ -66,3 +66,5 @@ dbx/dbx.*
 
 #Upload Folder
 upload/
+
+rsync.sh

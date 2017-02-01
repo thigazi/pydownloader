@@ -13,25 +13,6 @@ from os import sep
 from zope.component import createObject
 from transaction import commit
 
-@get('/verify/cookietest')
-def CookieTest():
-    if request.get_cookie('sid') is not None:
-        print Application().Tasks(['Sessions','checkExpired',request.get_cookie('sid')])
-        return request.get_cookie('sid')
-    
-    else:
-        return 'No!'
-
-@get('/verify/now')
-def SampleTest():
-    root = createObject('dbx').root
-    print root
-    for x in root['backend']['sessions'].keys():
-        del root['backend']['sessions'][x]
-    commit()
-    
-    return 'TEST'
-
 @get('/verify/session')
 def VerifySession():
     if request.is_xhr:

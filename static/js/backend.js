@@ -3,9 +3,12 @@ $(document).ready(function(){
     function Backend(){        
     };
     
-    Backend.prototype.CheckSession = function(type){
+    Backend.prototype.VerifySession = function()
+    {
     	$.get('/verify/session').done(function(data){
-    		console.log(data);
+    		if(data[0]){
+    			
+    		}
     	});
     };
     
@@ -26,6 +29,7 @@ $(document).ready(function(){
     Backend.prototype.ChangeExpire = function(cid){
                         
     };
+
     
     Backend.prototype.AddItem = function(cid){        
         //data = [true,true,'MeineDatei'];
@@ -99,7 +103,9 @@ $(document).ready(function(){
         });      
     };
     
-    Backend.prototype.Logout = function(){        
+    Backend.prototype.Logout = function(){
+    	Storages.cookieStorage.removeAll();
+    	window.location.href = '/login';        
     };
     
     BackendObj = new Backend();    
