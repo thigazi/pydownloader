@@ -1,15 +1,16 @@
-from additional import Singleton
-from zope.interface import Interface,implements
+from .additional import Singleton
+from zope.interface import Interface,implementer
 from platform import system
 
 from ZODB import DB
 from ZEO import ClientStorage
 from os import getcwd
+
 class IDBX(Interface):
     pass
 
-class DBX(object):
-    implements(IDBX)
+@implementer(IDBX)
+class DBX(object):    
     
     def __init__(self):
         if system() == 'Linux':

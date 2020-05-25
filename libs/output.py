@@ -1,14 +1,14 @@
-from additional import Singleton
+from .additional import Singleton
 from os import getcwd
 from jinja2 import Environment, FileSystemLoader
-from zope.interface import Interface,implements,Attribute
+from zope.interface import Interface,implementer,Attribute
 
 
 class ITemplate(Interface):
     pass
 
+@implementer(ITemplate)
 class Template(object):
-    implements(ITemplate)
     
     def __init__(self):        
         self.__env = Environment(loader=FileSystemLoader(getcwd()+'/tpl'),cache_size=0)

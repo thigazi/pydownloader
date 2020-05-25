@@ -3,7 +3,7 @@ from os import getcwd
 from bottle import static_file
 from zope.component import getUtility
 from libs.output import ITemplate
-from actions import Application
+from .actions import Application
 from bottle import route,static_file,request,response,get,post,error,redirect
 from json import dumps
 

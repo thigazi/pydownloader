@@ -1,17 +1,18 @@
 import re
-from additional import Singleton
+from .additional import Singleton
 from transaction import commit
 from bottle import request
 from zope.component import createObject
 from transaction import commit
 from persistent import Persistent
 
-import base64, md5
+from hashlib import md5
 from passlib.hash import pbkdf2_sha256
 from time import time
 from persistent.list import PersistentList as dlist
 from persistent.dict import PersistentDict as ddict
 from transaction import commit
+
 
 class Application(Singleton):
     
@@ -38,9 +39,7 @@ class Application(Singleton):
         if param[0] == 'checkExpired':
             rs = None
             sakeys = self.__root['backend']['sessions'].keys()
-            if self.__root['backend']['sessions'].has_key(param[1]):
-                
-                print sakeys
+            if param[1] in self.__root['backend']['sessions']:                                
                 tdiff = tnow-self.__root['backend']['sessions'][param[1]]
                 if tdiff>300:
                     rs = [False,None]
@@ -56,7 +55,7 @@ class Application(Singleton):
             else:
                 rs = [False,None]
             
-            for sk in sakeys:
+            for sk in sakeys:                
                 tdiff = tnow-self.__root['backend']['sessions'][sk]
                 if tdiff>300:
                     del self.__root['backend']['sessions'][sk]
@@ -64,11 +63,12 @@ class Application(Singleton):
             commit()
             return rs
             
-        elif param[0] == 'add':
-            print self.__root
-            sessdata = [md5.new(request.remote_addr+str(tnow)).hexdigest(),tnow]
+        elif param[0] == 'add':            
+            dg = md5()
+            dg.update(bytes(request.remote_addr+str(tnow),encoding='utf8'))
+            sessdata = [dg.hexdigest(),tnow]
             
-            if not self.__root['backend'].has_key('sessions'):
+            if 'sessions' not in self.__root['backend']:
                 self.__root['backend']['sessions'] = ddict({sessdata[0]:sessdata[1]})
             
             else:
@@ -88,10 +88,10 @@ class Application(Singleton):
         
     def __UserMNG(self,param):
         if param[0] == 'checkExist':
-            if not self.__root.has_key('backend'):
+            if 'backend' not in self.__root:
                 return [False,None]
             
-            if not self.__root['backend'].has_key('users'):
+            if 'users' not in self.__root['backend']:
                 return [False,None]
             
             elif len(self.__root['backend']['users']) == 0:
@@ -101,7 +101,7 @@ class Application(Singleton):
                 return [True,None]
         
         elif param[0] == 'add':
-            if not self.__root.has_key('backend'):
+            if 'backend' not in self.__root:
                 self.__root['backend'] = ddict({'users':ddict({param[1][0]:pbkdf2_sha256.encrypt(param[1][1], rounds=200000, salt_size=16)})})
                 
             else:
@@ -118,7 +118,7 @@ class Application(Singleton):
             pass
         
         elif param[0] == 'auth':
-            if self.__root['backend']['users'].has_key(param[1][0]):
+            if param[1][0] in self.__root['backend']['users']:
                 if pbkdf2_sha256.verify(param[1][1], self.__root['backend']['users'][param[1][0]]):
                     return [True,None]
                 
@@ -131,7 +131,7 @@ class Application(Singleton):
     def __DataMNG(self,param):
         if param[0] == 'Get':
             if param[1] == 'ListCodes':
-                if not self.__root.has_key('dlist'):
+                if 'dlist' not in self.__root:
                     self.__root['dlist'] = ddict()
                     commit()
                     
@@ -144,16 +144,16 @@ class Application(Singleton):
                     return [False,None,0]
             
             elif param[1] == 'CodeDetails':
-                if self.__root['dlist'].has_key(param[2]):                    
+                if param[2] in self.__root['dlist']:
                     return [True,self.__root['dlist'][param[2]]]
                 else:                    
                     return [False,None]
                 
             elif param[1] == 'DownloadItem':
-                if self.__root['dlist'].has_key(param[2][0]):
+                if param[2][0] in self.__root['dlist']:
                     dentry = self.__root['dlist'][param[2][0]]
                     
-                    if dentry.has_key(param[2][1]):
+                    if param[2][1] in dentry:
                         if dentry[param[2][1]]['maxtry']==0:
                             return [False,'Alle downloads depleted']
                         
@@ -174,9 +174,9 @@ class Application(Singleton):
             
         elif param[0] == 'Set':
             if param[1] == 'NewEntry':
-                mk = md5.new()
-                mk.update(str(time()))                
-                if not self.__root.has_key('dlist'):
+                mk = md5()
+                mk.update(str(time()).encode('utf8'))
+                if 'dlist' not in self.__root:
                     self.__root['dlist'] = ddict()                    
                 self.__root['dlist'][mk.hexdigest()[:10]] = ddict()                
                 commit()
@@ -189,22 +189,15 @@ class Application(Singleton):
                 return True
                 
             elif param[1] == 'NewItem':
-                if not self.__root.has_key('dlist'):
+                if 'dlist' not in self.__root:
                     self.__root['dlist'] = ddict()
                     self.__root['dlist'][param[2]] = ddict()
 
                 self.__root['dlist'][param[2]][param[3].filename] = ddict({'maxtry':3})
-                #self.__root['flist'][param[2]][param[3].filename] = pickle.dumps(param[3],protocol=2)                
                 commit()
                 
             elif param[1] == 'DeleteItem':
-                '''for xlist in ('flist','dlist'):
-                    if self.__root[xlist][param[2]].has_key(param[3]):
-                        del self.__root[xlist][param[2]][param[3]]
-                commit()                
-                '''
-                
-                if self.__root['dlist'][param[2]].has_key(param[3]):
+                if param[3] in self.__root['dlist'][param[2]]:
                     del self.__root['dlist'][param[2]][param[3]]                    
                 commit()
                 return True
